@@ -38,3 +38,12 @@ body {
     color: green;
     line-height: 13px;
 }
+
+.befriend {
+  cursor: pointer;
+}
+
+.myFriend {
+  font-weight: bold;
+  color: red;
+}

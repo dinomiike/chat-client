@@ -27,7 +27,7 @@ var sanitizeData = function(input) {
     return "";
   }
 };
-var autherName = "", message = "";
+var autherName = "", message = "", friend = "";
 
 
 
@@ -50,7 +50,7 @@ $(document).ready(function(){
         for (var i = 0; i < data.results.length; i += 1) {
           autherName = data.results[i].username || "anonymous";
           message = sanitizeData(data.results[i].text);
-          $('#chatBody').append("<p><strong>" + autherName + "</strong>: " + message + "</p>");
+          $('#chatBody').append("<p><strong class='befriend'>" + autherName + "</strong>: " + message + "</p>");
         }
       },
       error: function(data) {
@@ -76,13 +76,29 @@ $(document).ready(function(){
         // some stuff
       }
     });
+    $('#message').val('').focus();
+  });
 
- $('#message').val('').focus();
+  $("body").on("click", ".befriend", function(event){
+    // Get the name of the person you clicked on
+    friend = $(this).text();
 
+    // Get all the objects in the chat room into an array
+    var friends = $(".befriend").toArray();
+
+    // Loop through all chats
+    for (var i = 0; i < friends.length; i += 1) {
+      // If the current chat is from the friend you clicked on...
+      if ($(friends[i]).text() === friend) {
+        // Add a style to their class
+        $(friends[i]).addClass("myFriend");
+      }
+    }
   });
 
   // Wait x seconds and get messages
-  setInterval(getMessages, 1000);
+  getMessages();
+  setInterval(getMessages, 10000);
 });
 
 var Chat = function(whatever) {
