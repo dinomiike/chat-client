@@ -27,7 +27,7 @@ var sanitizeData = function(input) {
     return "";
   }
 };
-var autherName = "", message = "", friend = "", timeStamp = "";
+var autherName = "", message = "", friend = "", timeStamp = "2013-07-01T23:59:49.741Z";
 
 
 
@@ -39,28 +39,44 @@ $(document).ready(function(){
 
   // Get messages
   var getMessages = function(){
-    $.ajax('https://api.parse.com/1/classes/hrTest5', {
+    $.ajax('https://api.parse.com/1/classes/hrTest5?where={"createdAt":{"$gt":{"__type":"Date","iso":"' + timeStamp + '"}}}', {
       contentType: 'application/json',
       type: 'GET',
-      data: {
-        "order": '-createdAt'
-      },
+      // params: encodeURIComponent({"where": JSON.stringify({
+      //     "username": {
+      //     "$ne": "notepad"
+      //     }
+      //   })
+      // }),
+      // },
       success: function(data){
         // debugger;
         // $("#chatBody").text("");
-        for (var i = data.results.length - 1; i > 0; i -= 1) {
+        // for (var i = data.results.length - 1; i > 0; i -= 1) {
+        for (var i = 0; i < data.results.length; i += 1) {
           // if the time stamp is newer than timeStamp
           autherName = sanitizeData(data.results[i].username) || "anonymous";
           message = sanitizeData(data.results[i].text);
-          if (timeStamp === "") {
-            $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
-          } else if (data.results[i].createdAt > timeStamp){
+          // if (timeStamp === "") {
+          //   $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
+          // } else if (data.results[i].createdAt > timeStamp){
             // else ignore it?
             // debugger;
+            if(data.results[i].username === friend){
+                $('#chatBody').prepend("<p class='befriend myFriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
+                timeStamp = data.results[i].createdAt;
+            } else {
+
             $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
-          }
+            timeStamp = data.results[i].createdAt;
+            }
+          // }
         }
-        timeStamp = data.results[data.results.length-1].createdAt;
+        // debugger;
+        if (data.results.length > 1) {
+          // timeStamp = data.results[data.results.length - 2].createdAt;
+          // timeStamp = data.results[data.results.length - 1].createdAt;
+        }
       },
       error: function(data) {
         console.log('Ajax request failed');
@@ -88,7 +104,7 @@ $(document).ready(function(){
     $('#message').val('').focus();
   });
 
-  $("body").on("click", ".befriend", function(event){
+  $("body").delegate(".befriend", "click", function(event){
     // Get the name of the person you clicked on
     friend = $(this).children()[0];
     friend = $(friend).text();
