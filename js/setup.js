@@ -27,7 +27,7 @@ var sanitizeData = function(input) {
     return "";
   }
 };
-var autherName = "", message = "", friend = "";
+var autherName = "", message = "", friend = "", timeStamp = "";
 
 
 
@@ -39,19 +39,28 @@ $(document).ready(function(){
 
   // Get messages
   var getMessages = function(){
-    $.ajax('https://api.parse.com/1/classes/messages', {
+    $.ajax('https://api.parse.com/1/classes/hrTest5', {
       contentType: 'application/json',
       type: 'GET',
       data: {
         "order": '-createdAt'
       },
       success: function(data){
-        $("#chatBody").text("");
-        for (var i = 0; i < data.results.length; i += 1) {
-          autherName = data.results[i].username || "anonymous";
+        // debugger;
+        // $("#chatBody").text("");
+        for (var i = data.results.length - 1; i > 0; i -= 1) {
+          // if the time stamp is newer than timeStamp
+          autherName = sanitizeData(data.results[i].username) || "anonymous";
           message = sanitizeData(data.results[i].text);
-          $('#chatBody').append("<p class='befriend'><strong>" + autherName + "</strong>: " + message + "</p>");
+          if (timeStamp === "") {
+            $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
+          } else if (data.results[i].createdAt > timeStamp){
+            // else ignore it?
+            // debugger;
+            $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
+          }
         }
+        timeStamp = data.results[data.results.length-1].createdAt;
       },
       error: function(data) {
         console.log('Ajax request failed');
@@ -65,7 +74,7 @@ $(document).ready(function(){
   $("#send").on("click", function(){
     $.ajax({
       type: 'POST',
-      url: "https://api.parse.com/1/classes/messages",
+      url: "https://api.parse.com/1/classes/hrTest5",
       data: JSON.stringify({
         username: userName,
         text: $("#message").val()
@@ -100,7 +109,7 @@ $(document).ready(function(){
 
   // Wait x seconds and get messages
   getMessages();
-  setInterval(getMessages, 10000);
+  setInterval(getMessages, 5000);
 });
 
 var Chat = function(whatever) {
