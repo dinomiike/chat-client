@@ -89,7 +89,7 @@ $(document).ready(function(){
   });
 
   $("#create").on("click", function(){
-    clearInterval(1);
+    clearInterval(intervalId);
     createRoom();
     getMessages();
     $("#chatBody").html("").append("You have entered " + chatRoom);
