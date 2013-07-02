@@ -8,12 +8,6 @@ if(!/(&|\?)username=/.test(window.location.search)){
 }
 var userName = window.location.search.replace(/\?username=/, "");
 
-// Don't worry about this code, it will ensure that your ajax calls are allowed by the browser
-// $.ajaxPrefilter(function(settings, _, jqXHR) {
-//   jqXHR.setRequestHeader("X-Parse-Application-Id", "voLazbq9nXuZuos9hsmprUz7JwM2N0asnPnUcI7r");
-//   jqXHR.setRequestHeader("X-Parse-REST-API-Key", "QC2F43aSAghM97XidJw8Qiy1NXlpL5LR45rhAVAf");
-// });
-
 var sanitizeData = function(input) {
   // return input.replace(/<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>(.*?)<\/\1>|<[^>]*>/, "");
   if (input) {
@@ -27,6 +21,7 @@ var sanitizeData = function(input) {
     return "";
   }
 };
+
 var autherName = "", message = "", friend = "", timeStamp = "2013-07-01T23:59:49.741Z";
 
 
@@ -42,40 +37,18 @@ $(document).ready(function(){
     $.ajax('https://api.parse.com/1/classes/hrTest5?where={"createdAt":{"$gt":{"__type":"Date","iso":"' + timeStamp + '"}}}', {
       contentType: 'application/json',
       type: 'GET',
-      // params: encodeURIComponent({"where": JSON.stringify({
-      //     "username": {
-      //     "$ne": "notepad"
-      //     }
-      //   })
-      // }),
-      // },
       success: function(data){
-        // debugger;
-        // $("#chatBody").text("");
-        // for (var i = data.results.length - 1; i > 0; i -= 1) {
         for (var i = 0; i < data.results.length; i += 1) {
           // if the time stamp is newer than timeStamp
           autherName = sanitizeData(data.results[i].username) || "anonymous";
           message = sanitizeData(data.results[i].text);
-          // if (timeStamp === "") {
-          //   $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
-          // } else if (data.results[i].createdAt > timeStamp){
-            // else ignore it?
-            // debugger;
-            if(data.results[i].username === friend){
-                $('#chatBody').prepend("<p class='befriend myFriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
-                timeStamp = data.results[i].createdAt;
-            } else {
-
+          if(data.results[i].username === friend){
+            $('#chatBody').prepend("<p class='befriend myFriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
+            timeStamp = data.results[i].createdAt;
+          } else {
             $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
             timeStamp = data.results[i].createdAt;
-            }
-          // }
-        }
-        // debugger;
-        if (data.results.length > 1) {
-          // timeStamp = data.results[data.results.length - 2].createdAt;
-          // timeStamp = data.results[data.results.length - 1].createdAt;
+          }
         }
       },
       error: function(data) {
@@ -84,10 +57,8 @@ $(document).ready(function(){
     });
   };
 
-  $('h2').text(userName);
-
   // Send a message
-  $("#send").on("click", function(){
+  var sendMessage = function(){
     $.ajax({
       type: 'POST',
       url: "https://api.parse.com/1/classes/hrTest5",
@@ -102,6 +73,13 @@ $(document).ready(function(){
       }
     });
     $('#message').val('').focus();
+  };
+
+  $('h2').text(userName);
+
+  // Send a message
+  $("#send").on("click", function(){
+    sendMessage();
   });
 
   $("body").delegate(".befriend", "click", function(event){
@@ -123,29 +101,12 @@ $(document).ready(function(){
     }
   });
 
+  $("form").on("submit", function(event){
+    event.preventDefault();
+  });
+
   // Wait x seconds and get messages
   getMessages();
   setInterval(getMessages, 5000);
 });
-
-var Chat = function(whatever) {
-
-};
-
-Chat.prototype.getMessages = function() {
-
-};
-
-Chat.prototype.sendMessage = function(message) {
-  var self = this;
-
-  $.ajax('http://cow.com/moo', {
-    success: function() {
-      self.doThings(); // instead of this.doThings();
-    }
-  });
-};
-
-// var chat = new Chat();
-
 
