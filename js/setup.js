@@ -23,7 +23,7 @@ var sanitizeData = function(input) {
 };
 
 var autherName = "", message = "", friend = "", timeStamp = "2013-07-01T23:59:49.741Z";
-
+var chatRoom = "messages", intervalId = "";
 
 
 $(document).ready(function(){
@@ -34,7 +34,7 @@ $(document).ready(function(){
 
   // Get messages
   var getMessages = function(){
-    $.ajax('https://api.parse.com/1/classes/hrTest5?where={"createdAt":{"$gt":{"__type":"Date","iso":"' + timeStamp + '"}}}', {
+    $.ajax('https://api.parse.com/1/classes/' + chatRoom + '?where={"createdAt":{"$gt":{"__type":"Date","iso":"' + timeStamp + '"}}}', {
       contentType: 'application/json',
       type: 'GET',
       success: function(data){
@@ -46,7 +46,7 @@ $(document).ready(function(){
             $('#chatBody').prepend("<p class='befriend myFriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
             timeStamp = data.results[i].createdAt;
           } else {
-            $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + " (" + data.results[i].createdAt +")</p>");
+            $('#chatBody').prepend("<p class='befriend'><strong>" + autherName + "</strong>: " + message + "</p>");
             timeStamp = data.results[i].createdAt;
           }
         }
@@ -55,13 +55,14 @@ $(document).ready(function(){
         console.log('Ajax request failed');
       }
     });
+    console.log(intervalId);
   };
 
   // Send a message
   var sendMessage = function(){
     $.ajax({
       type: 'POST',
-      url: "https://api.parse.com/1/classes/hrTest5",
+      url: "https://api.parse.com/1/classes/" + chatRoom,
       data: JSON.stringify({
         username: userName,
         text: $("#message").val()
@@ -75,11 +76,25 @@ $(document).ready(function(){
     $('#message').val('').focus();
   };
 
-  $('h2').text(userName);
+  var createRoom = function() {
+    chatRoom = $('#room').val();
+  };
+
+  $('#user').text('名前:' + userName);
+  $('#chatroom').text('部屋:' + chatRoom);
 
   // Send a message
   $("#send").on("click", function(){
     sendMessage();
+  });
+
+  $("#create").on("click", function(){
+    clearInterval(1);
+    createRoom();
+    getMessages();
+    $("#chatBody").html("").append("You have entered " + chatRoom);
+    $('#chatroom').text('部屋:' + chatRoom);
+    intervalId = setInterval(getMessages, 5000);
   });
 
   $("body").delegate(".befriend", "click", function(event){
@@ -107,6 +122,6 @@ $(document).ready(function(){
 
   // Wait x seconds and get messages
   getMessages();
-  setInterval(getMessages, 5000);
+  intervalId = setInterval(getMessages, 5000);
 });
 
